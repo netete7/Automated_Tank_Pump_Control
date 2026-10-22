@@ -1,0 +1,17 @@
+OpenPLC Tank Visualizer for Mac
+
+Start it
+1. Double-click “Start Tank Visualizer.command”. If macOS asks whether to open it, choose Open.
+2. Enter your OpenPLC username and password in the Terminal window. The password is not shown while you type.
+3. Open http://127.0.0.1:8765 in your browser. Keep the Terminal window open while you use the visualizer.
+
+Stop it
+Return to the Terminal window and press Control-C. Press Return if the window asks you to close it.
+
+History and downloads
+The page saves up to 30 minutes of recent samples and up to 100 events in this browser on this Mac. This history is local to the browser and is not sent to OpenPLC. Use “Download CSV” to save a copy you can keep elsewhere.
+
+Safety
+The bridge reads debugger values only. It does not write variables, force outputs, or change the PLC program. The saved OpenPLC project and backup are separate and are not modified by this visualizer.
+
+The displayed timer is an estimate measured by the browser from TON0.IN. It is not the PLC timer’s exact elapsed-time value.

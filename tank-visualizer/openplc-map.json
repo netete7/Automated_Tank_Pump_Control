@@ -1,0 +1,22 @@
+{
+  "source": "Automated_Tank_Pump_Control/build/OpenPLC Runtime v4/src/debug-map.json",
+  "expectedMd5": "323bea390edd70978914c5f6a1754e01",
+  "variables": [
+    {"name":"LOW_LEVEL","arrayIdx":0,"elemIdx":0,"type":"BOOL","size":1},
+    {"name":"PUMP_COMMAND","arrayIdx":0,"elemIdx":1,"type":"BOOL","size":1},
+    {"name":"HIGH_LEVEL","arrayIdx":0,"elemIdx":2,"type":"BOOL","size":1},
+    {"name":"HIGH_HIGH_LEVEL","arrayIdx":0,"elemIdx":3,"type":"BOOL","size":1},
+    {"name":"HIGH_HIGH_ALARM","arrayIdx":0,"elemIdx":4,"type":"BOOL","size":1},
+    {"name":"SENSOR_FAULT","arrayIdx":0,"elemIdx":5,"type":"BOOL","size":1},
+    {"name":"SENSOR_FAULT_ALARM","arrayIdx":0,"elemIdx":6,"type":"BOOL","size":1},
+    {"name":"PUMP_RUNNING","arrayIdx":0,"elemIdx":7,"type":"BOOL","size":1},
+    {"name":"PUMP_START_FAILURE","arrayIdx":0,"elemIdx":8,"type":"BOOL","size":1},
+    {"name":"TON0.IN","arrayIdx":0,"elemIdx":9,"type":"BOOL","size":1},
+    {"name":"TON0.Q","arrayIdx":0,"elemIdx":11,"type":"BOOL","size":1},
+    {"name":"PUMP_START_FAILURE_ALARM","arrayIdx":0,"elemIdx":13,"type":"BOOL","size":1},
+    {"name":"LOW_SENSOR_HEALTHY","arrayIdx":0,"elemIdx":14,"type":"BOOL","size":1},
+    {"name":"HIGH_SENSOR_HEALTHY","arrayIdx":0,"elemIdx":15,"type":"BOOL","size":1},
+    {"name":"HIGH_SENSOR_HEALTHY0","arrayIdx":0,"elemIdx":16,"type":"BOOL","size":1},
+    {"name":"HIGH_HIGH_SENSOR_HEALTHY","arrayIdx":0,"elemIdx":17,"type":"BOOL","size":1}
+  ]
+}

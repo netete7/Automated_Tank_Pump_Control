@@ -1,0 +1,25 @@
+Automated Tank Fluid-Level & Pump Control
+Beginner-Friendly Visualizer Demo Checklist
+
+Purpose
+Show that the OpenPLC debugger and the separate tank visualizer display the same live signals. The visualizer is read-only. The tank percentage is an estimate from discrete switches, not an analog level measurement.
+
+Before the demo
+[ ] Start OpenPLC Runtime and open the project in the Editor debugger.
+[ ] Start the visualizer with “Start Tank Visualizer.command”. Enter the OpenPLC login in Terminal; keep that Terminal window open.
+[ ] Open http://127.0.0.1:8765 and wait for the Connected status.
+[ ] Compare a few visible signal values against the Editor debugger. Do not change or force any PLC variables during the live demonstration.
+
+Demo sequence
+1. Introduce the tank picture as a read-only visual companion to the PLC ladder logic.
+2. Point out the level bands: low at 20%, high at 90%, and high-high at 95%. Explain that these are approximate display bands inferred from switch states.
+3. Show the low, high, and high-high sensor-health indicators and the live pump status. If the pump is running, point out the moving outlet flow.
+4. Show the alarm summary and recent event list. If no alarm is active, say that the indicators report the current live state; refer to the already completed ladder-logic tests for alarm behavior. Do not force an alarm for the demo.
+5. Click “Download CSV” and show that the file contains timestamped level samples and recorded events. The browser stores recent history locally on this Mac while the page is open.
+
+Wrap up
+[ ] State that the bridge reads debugger values only and does not control the PLC.
+[ ] Stop the bridge with Control-C in its Terminal window when finished. Leave the OpenPLC project and backup unchanged.
+
+Optional presentation capture
+If a screenshot is needed for a report, capture the visualizer and debugger with the live Connected status visible. Keep account credentials and passwords out of screenshots.

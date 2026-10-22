@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f3f7fb">
+  <title>Tank &amp; Pump — Visual Preview</title>
+  <style>
+    :root { color-scheme: light; --ink:#14283f; --muted:#60758b; --line:#d9e4ee; --blue:#168bd2; --green:#189b70; --amber:#e5a33b; }
+    * { box-sizing:border-box }
+    body { margin:0; min-height:100vh; background:linear-gradient(145deg,#f6f9fc,#eaf2f8); color:var(--ink); font:16px/1.45 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif }
+    main { width:min(1000px,calc(100% - 32px)); margin:36px auto; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:20px; margin-bottom:22px }
+    h1 { margin:0; font-size:clamp(26px,4vw,38px); letter-spacing:-.035em }
+    .sub { margin:6px 0 0; color:var(--muted) }
+    .badge { display:inline-flex; align-items:center; gap:8px; border:1px solid #e9d8b8; border-radius:999px; background:#fffaf0; padding:8px 12px; color:#825718; font-size:13px; font-weight:700; white-space:nowrap }
+    .dot { width:8px;height:8px;border-radius:50%;background:var(--amber) }
+    .badge.live { border-color:#b9e5d4; background:#effaf5; color:#117351 }
+    .badge.live .dot { background:var(--green) }
+    body.live #range-wrap { display:none }
+    body.live .signal button { cursor:default; opacity:.9 }
+    .panel { background:#fff; border:1px solid var(--line); border-radius:20px; box-shadow:0 12px 32px #183b5710 }
+    .scene { display:grid; grid-template-columns:minmax(260px,1fr) minmax(260px,.8fr); gap:24px; padding:24px }
+    .drawing { min-height:390px; display:grid; place-items:center; background:radial-gradient(ellipse at 50% 80%,#e7f5fc,transparent 62%); border-radius:16px; overflow:hidden }
+    svg { width:min(100%,430px); height:auto }
+    .side { display:flex; flex-direction:column; gap:16px; justify-content:center }
+    .metric { padding:18px; border:1px solid var(--line); border-radius:15px; background:#fbfdff }
+    .metric-head { display:flex; justify-content:space-between; align-items:center; gap:12px }
+    .label { color:var(--muted); font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.07em }
+    .value { font-size:32px; font-weight:750; letter-spacing:-.04em }
+    .status { display:inline-flex; align-items:center; gap:8px; padding:7px 10px; border-radius:999px; font-size:14px; font-weight:700; background:#eef3f7; color:#53687d }
+    .status.on { background:#e8f7f1; color:#117351 }
+    .status.off { background:#f0f3f6; color:#52677b }
+    .status.alarm { background:#fff0ed; color:#b33c2e }
+    .led { width:9px;height:9px;border-radius:50%;background:currentColor }
+    .flow-indicator { fill:none;stroke:#a8e8ff;stroke-width:5;stroke-dasharray:3 13;stroke-linecap:round;opacity:0 }
+    body.pump-running .flow-indicator { opacity:1;animation:flow 0.7s linear infinite }
+    @keyframes flow { to { stroke-dashoffset:-32 } }
+    .range-wrap { margin-top:14px }
+    input[type=range] { width:100%; accent-color:var(--blue); cursor:pointer }
+    .range-labels { display:flex; justify-content:space-between; color:var(--muted); font-size:12px }
+    .hint { color:var(--muted); font-size:13px; margin:0 }
+    .signals { grid-column:1 / -1; padding-top:6px }
+    .signals h2 { margin:0; font-size:20px; letter-spacing:-.02em }
+    .signals-intro { margin:5px 0 14px; color:var(--muted); font-size:13px }
+    .signal-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px }
+    .health-grid { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:12px }
+    .health-item { padding:12px;border:1px solid var(--line);border-radius:12px;background:#fbfdff }
+    .history { grid-column:1/-1;padding:18px;border:1px solid var(--line);border-radius:15px;background:#fbfdff }
+    .history svg { display:block;width:100%;height:150px;margin-top:10px }
+    .history-line { fill:none;stroke:var(--blue);stroke-width:3;stroke-linecap:round;stroke-linejoin:round }
+    .history-axis { stroke:#d9e4ee;stroke-width:1 }
+    .history-events { max-height:190px;overflow:auto;margin:10px 0 0;padding:0;list-style:none }
+    .history-events li { padding:8px 2px;border-top:1px solid var(--line);font-size:13px;color:#415a70 }
+    .history-actions { display:flex;align-items:center;gap:12px }
+    .download { border:1px solid #b8ccdc;border-radius:9px;padding:8px 11px;background:white;color:#23435e;font:600 13px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;cursor:pointer }
+    .signal { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:11px 12px; border:1px solid var(--line); border-radius:12px; background:#fbfdff; min-width:0 }
+    .signal-name { overflow-wrap:anywhere; color:#415a70; font-size:12px; font-weight:650 }
+    .signal button { border:0; border-radius:999px; padding:6px 10px; background:#edf1f5; color:#53687d; font:700 12px -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; cursor:pointer; min-width:58px }
+    .signal button[aria-pressed="true"] { background:#e4f6ef; color:#117351 }
+    .timer-value { color:#71869a; font-size:12px; font-weight:700; white-space:nowrap }
+    .notice { margin-top:18px; padding:14px 16px; border-left:4px solid var(--blue); border-radius:8px; background:#edf7fd; color:#35556e; font-size:14px }
+    footer { margin:16px 4px 0; color:var(--muted); font-size:12px }
+    @media(max-width:700px) { main{margin:20px auto}.scene{grid-template-columns:1fr;padding:16px}.drawing{min-height:300px}header{display:block}.badge{margin-top:14px}.signal-grid{grid-template-columns:repeat(2,minmax(0,1fr))} }
+    @media(max-width:430px) { .signal-grid{grid-template-columns:1fr} }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div><h1>Tank &amp; Pump</h1><p class="sub">A visual companion for your OpenPLC tank control project</p></div>
+      <div id="connection-badge" class="badge"><span class="dot"></span><span id="connection-label">Preview only · PLC not connected</span></div>
+    </header>
+    <section class="panel scene" aria-label="Tank visual preview">
+      <div class="drawing">
+        <svg viewBox="0 0 420 440" role="img" aria-labelledby="tank-title tank-desc">
+          <title id="tank-title">Water tank and pump preview</title>
+          <desc id="tank-desc">A tank whose blue water height changes with the preview slider.</desc>
+          <defs>
+            <clipPath id="tank-clip"><path d="M100 72 Q100 56 118 56 H302 Q320 56 320 72 V326 Q320 344 302 344 H118 Q100 344 100 326Z"/></clipPath>
+            <linearGradient id="water" x2="0" y2="1"><stop stop-color="#64c9f5"/><stop offset="1" stop-color="#168bd2"/></linearGradient>
+          </defs>
+          <path d="M82 72 Q82 38 116 38 H304 Q338 38 338 72" fill="none" stroke="#54728c" stroke-width="10" stroke-linecap="round"/>
+          <rect x="94" y="54" width="232" height="302" rx="22" fill="#f7fbfe" stroke="#54728c" stroke-width="9"/>
+          <g clip-path="url(#tank-clip)">
+            <rect id="water-fill" x="100" y="224" width="220" height="132" fill="url(#water)"/>
+            <path id="waterline" d="M100 224 Q128 216 156 224 T212 224 T268 224 T324 224" fill="none" stroke="#b8edff" stroke-width="4" opacity=".9"/>
+            <path d="M110 283 Q135 275 160 283 T210 283 T260 283 T310 283" fill="none" stroke="#d8f5ff" stroke-width="3" opacity=".5"/>
+          </g>
+          <path d="M94 358 H326" stroke="#54728c" stroke-width="9" stroke-linecap="round"/>
+          <path d="M124 358 V389 M296 358 V389" stroke="#54728c" stroke-width="9" stroke-linecap="round"/>
+          <path d="M210 356 V393 H350 V365" fill="none" stroke="#54728c" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+          <path class="flow-indicator" d="M210 356 V393 H350 V365"/>
+          <rect x="332" y="335" width="56" height="50" rx="13" fill="#eaf3f8" stroke="#54728c" stroke-width="7"/>
+          <circle cx="360" cy="360" r="12" fill="#168bd2"/>
+          <path d="M360 348 V372 M348 360 H372" stroke="white" stroke-width="3" stroke-linecap="round"/>
+          <text x="210" y="92" text-anchor="middle" fill="#54728c" font-size="13" font-weight="700" letter-spacing="2">TANK</text>
+          <text x="210" y="420" text-anchor="middle" fill="#60758b" font-size="13" font-weight="700" letter-spacing="1">PUMP</text>
+          <g fill="#89a1b5" font-size="12"><text x="69" y="70" text-anchor="end">HH 95%</text><text x="69" y="85" text-anchor="end">H 90%</text><text x="69" y="287" text-anchor="end">L 20%</text></g>
+          <g stroke="#9bb0c1" stroke-width="2"><path d="M76 98 H89 M76 220 H89 M76 332 H89"/></g>
+        </svg>
+      </div>
+      <div class="side">
+        <div class="metric">
+          <div class="metric-head"><span class="label">Water level</span><span class="value"><span id="level-value">42</span><small style="font-size:16px;color:#60758b">%</small></span></div>
+          <div id="range-wrap" class="range-wrap"><input id="level" type="range" min="0" max="100" value="42" aria-label="Preview water level"><div class="range-labels"><span>Empty</span><span>Full</span></div></div>
+        </div>
+        <div class="metric"><div class="metric-head"><span id="pump-label" class="label">Pump</span><span id="pump-status" class="status off"><span class="led"></span>Off</span></div><p class="hint" style="margin-top:10px">Preview indicator only. It does not control your PLC.</p></div>
+        <div class="metric"><div class="metric-head"><span class="label">Alarms</span><span id="alarm-status" class="status off"><span class="led"></span>No active alarms</span></div><p id="alarm-detail" class="hint" style="margin-top:10px">Alarm signals will appear here.</p></div>
+        <div class="metric"><div class="metric-head"><span class="label">Pump start-failure timer</span><span id="failure-timer" class="status"><span class="led"></span>Waiting</span></div><p id="fault-detail" class="hint" style="margin-top:10px">Sensor and pump fault details will appear here.</p></div>
+        <div class="metric"><div class="metric-head"><span class="label">Control state</span><span id="state-status" class="status"><span class="led"></span>Waiting for connection</span></div></div>
+        <p id="level-hint" class="hint">Use the slider to preview water height. Live mode will estimate a level band from the discrete level switches.</p>
+      </div>
+      <section class="signals" aria-labelledby="signals-title">
+        <h2 id="signals-title">Debugger signals</h2>
+        <p class="signals-intro">Preview switches for the variables you listed. They change this page only; they are not live PLC values.</p>
+        <div class="signal-grid" id="signal-grid"></div>
+      </section>
+      <section class="signals" aria-labelledby="health-title">
+        <h2 id="health-title">Sensor health</h2>
+        <p class="signals-intro">Health indicators follow the live debugger values.</p>
+        <div class="health-grid">
+          <div class="health-item"><span class="label">Low sensor</span><div id="health-low" class="status"><span class="led"></span>Waiting</div></div>
+          <div class="health-item"><span class="label">High sensor</span><div id="health-high" class="status"><span class="led"></span>Waiting</div></div>
+          <div class="health-item"><span class="label">High-high sensor</span><div id="health-high-high" class="status"><span class="led"></span>Waiting</div></div>
+        </div>
+      </section>
+      <section class="history" aria-labelledby="history-title">
+        <div class="metric-head"><div><h2 id="history-title" style="margin:0;font-size:20px">Level history</h2><p class="hint">Approximate level · graph shows recent samples; saved history is kept in this browser on this Mac.</p></div><div class="history-actions"><span id="history-current" class="status">Waiting</span><button id="download-history" class="download" type="button">Download CSV</button></div></div>
+        <svg viewBox="0 0 600 150" role="img" aria-label="Rolling approximate tank level history"><path class="history-axis" d="M30 20 H590 M30 75 H590 M30 130 H590"/><text x="4" y="24" fill="#71869a" font-size="11">100%</text><text x="10" y="79" fill="#71869a" font-size="11">50%</text><text x="20" y="134" fill="#71869a" font-size="11">0%</text><polyline id="history-line" class="history-line" points=""/><g id="history-markers" fill="#e5a33b" stroke="white" stroke-width="2"></g></svg>
+        <h3 style="margin:8px 0 0;font-size:15px">Recent events</h3><ul id="event-history" class="history-events"><li>Waiting for live values.</li></ul>
+      </section>
+    </section>
+    <div class="notice"><strong>Safe preview:</strong> the preview switches only change this picture. Live mode reads values only; it cannot start, stop, force, or change your PLC program. In live mode, the tank height is an estimate from level switches, not an analog measurement.</div>
+    <footer>Tank visualizer · Separate preview file · Your saved OpenPLC project is not modified</footer>
+  </main>
+  <script>
+    const slider = document.querySelector('#level');
+    const value = document.querySelector('#level-value');
+    const fill = document.querySelector('#water-fill');
+    const line = document.querySelector('#waterline');
+    const signals = [
+      'LOW_LEVEL', 'PUMP_COMMAND', 'HIGH_LEVEL', 'HIGH_HIGH_LEVEL',
+      'HIGH_HIGH_ALARM', 'SENSOR_FAULT', 'SENSOR_FAULT_ALARM', 'PUMP_RUNNING',
+      'PUMP_START_FAILURE', 'PUMP_START_FAILURE_ALARM', 'LOW_SENSOR_HEALTHY',
+      'HIGH_SENSOR_HEALTHY', 'HIGH_SENSOR_HEALTHY0', 'HIGH_HIGH_SENSOR_HEALTHY',
+      'TON0.IN', 'TON0.Q'
+    ];
+    const grid = document.querySelector('#signal-grid');
+    const buttons = new Map();
+    const history = [];
+    const events = [];
+    let previousLevel = null;
+    let previousAlarms = null;
+    let timingSince = null;
+    const healthSignals = [['health-low', 'LOW_SENSOR_HEALTHY'], ['health-high', 'HIGH_SENSOR_HEALTHY'], ['health-high-high', 'HIGH_HIGH_SENSOR_HEALTHY']];
+    function updateHealth(values) {
+      for (const [id, name] of healthSignals) {
+        const indicator = document.getElementById(id);
+        const healthy = values?.[name];
+        indicator.classList.toggle('on', healthy === true);
+        indicator.classList.toggle('alarm', healthy === false);
+        indicator.classList.toggle('off', healthy !== true && healthy !== false);
+        indicator.innerHTML = `<span class="led"></span>${healthy === true ? 'Healthy' : healthy === false ? 'Fault' : 'Unknown'}`;
+      }
+    }
+    function addHistory(percent) {
+      history.push({timestamp: new Date().toISOString(), level: percent});
+      if (history.length > 3600) history.shift();
+      renderHistory();
+    }
+    function renderHistory() {
+      const visible = history.slice(-60);
+      const pointX = index => 30 + (visible.length < 2 ? 0 : index * (560 / (visible.length - 1)));
+      const points = visible.map((sample, index) => `${pointX(index)},${130 - sample.level * 1.1}`).join(' ');
+      document.querySelector('#history-line').setAttribute('points', points);
+      const markers = document.querySelector('#history-markers');
+      markers.replaceChildren(...visible.flatMap((sample, index) => index > 0 && sample.level !== visible[index - 1].level ? [Object.assign(document.createElementNS('http://www.w3.org/2000/svg', 'circle'), {cx:pointX(index), cy:130 - sample.level * 1.1, r:5})] : []));
+      if (visible.length) document.querySelector('#history-current').textContent = `~${visible[visible.length - 1].level}%`;
+    }
+    function addEvent(type, details, level) {
+      const event = {timestamp: new Date().toISOString(), type, details, level};
+      events.unshift(event);
+      if (events.length > 100) events.pop();
+      const list = document.querySelector('#event-history');
+      if (events.length === 1) list.textContent = '';
+      const item = document.createElement('li');
+      item.textContent = `${new Date(event.timestamp).toLocaleTimeString()} · ${type}: ${details}${level == null ? '' : ` (~${level}%)`}`;
+      list.prepend(item);
+      while (list.children.length > 20) list.lastElementChild.remove();
+      persistArchive();
+    }
+    function persistArchive() {
+      try { localStorage.setItem('tank-visualizer-history-v1', JSON.stringify({history, events})); } catch (_) {}
+    }
+    function restoreArchive() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('tank-visualizer-history-v1') || '{}');
+        if (Array.isArray(saved.history)) history.push(...saved.history.filter(item => Number.isFinite(item.level) && typeof item.timestamp === 'string').slice(-3600));
+        if (Array.isArray(saved.events)) events.push(...saved.events.filter(item => typeof item.timestamp === 'string' && typeof item.details === 'string').slice(0, 100));
+        renderHistory();
+        if (events.length) {
+          const list = document.querySelector('#event-history');
+          list.textContent = '';
+          for (const event of events.slice(0, 20).reverse()) {
+            const item = document.createElement('li');
+            item.textContent = `${new Date(event.timestamp).toLocaleTimeString()} · ${event.type}: ${event.details}${event.level == null ? '' : ` (~${event.level}%)`}`;
+            list.append(item);
+          }
+        }
+      } catch (_) {}
+    }
+    function updateFailureTimer(values) {
+      const input = values?.['TON0.IN'] === true;
+      const done = values?.['TON0.Q'] === true;
+      const display = document.querySelector('#failure-timer');
+      if (input && timingSince === null) timingSince = Date.now();
+      if (!input) timingSince = null;
+      const seconds = timingSince === null ? 0 : Math.floor((Date.now() - timingSince) / 1000);
+      const formatted = `${String(Math.floor(seconds / 60)).padStart(2, '0')}:${String(seconds % 60).padStart(2, '0')}`;
+      display.classList.toggle('on', done);
+      display.classList.toggle('alarm', values?.PUMP_START_FAILURE === true || values?.PUMP_START_FAILURE_ALARM === true);
+      display.innerHTML = `<span class="led"></span>${done ? 'Timer done' : input ? `Timing · ${formatted}` : 'Idle · 00:00'}`;
+      const faults = [];
+      if (values?.SENSOR_FAULT === true) faults.push('SENSOR_FAULT active');
+      if (values?.SENSOR_FAULT_ALARM === true) faults.push('SENSOR_FAULT_ALARM active');
+      for (const [name, label] of [['LOW_SENSOR_HEALTHY','low'],['HIGH_SENSOR_HEALTHY','high'],['HIGH_HIGH_SENSOR_HEALTHY','high-high']]) {
+        if (values?.[name] === false) faults.push(`${label} sensor unhealthy`);
+      }
+      if (values?.PUMP_START_FAILURE === true) faults.push('Pump start failure active');
+      document.querySelector('#fault-detail').textContent = faults.length ? faults.join(' · ') : 'No sensor or pump-start faults reported.';
+    }
+    function downloadHistory() {
+      const rows = [['record_type', 'timestamp', 'approx_level_percent', 'details']];
+      for (const sample of history) rows.push(['sample', sample.timestamp, sample.level, '']);
+      for (const event of events) rows.push(['event', event.timestamp, event.level ?? '', `${event.type}: ${event.details}`]);
+      rows.splice(1, rows.length - 1, ...rows.slice(1).sort((a, b) => a[1].localeCompare(b[1])));
+      const csv = rows.map(row => row.map(value => `"${String(value).replaceAll('"', '""')}"`).join(',')).join('\n');
+      const url = URL.createObjectURL(new Blob([csv], {type:'text/csv;charset=utf-8'}));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `tank-history-${new Date().toISOString().slice(0,10)}.csv`;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    }
+    document.querySelector('#download-history').addEventListener('click', downloadHistory);
+    restoreArchive();
+    setInterval(persistArchive, 5000);
+    window.addEventListener('pagehide', persistArchive);
+    const alarmNames = ['HIGH_HIGH_ALARM', 'SENSOR_FAULT_ALARM', 'PUMP_START_FAILURE_ALARM'];
+    function updateAlarms(values = null) {
+      const active = alarmNames.filter(name => values ? values[name] === true : buttons.get(name)?.getAttribute('aria-pressed') === 'true');
+      const status = document.querySelector('#alarm-status');
+      status.classList.toggle('alarm', active.length > 0);
+      status.classList.toggle('off', active.length === 0);
+      status.innerHTML = `<span class="led"></span>${active.length ? `${active.length} active` : 'No active alarms'}`;
+      document.querySelector('#alarm-detail').textContent = active.length ? active.join(', ') : 'No alarm signals are active.';
+    }
+    for (const name of signals) {
+      const row = document.createElement('div');
+      row.className = 'signal';
+      const label = document.createElement('span');
+      label.className = 'signal-name';
+      label.textContent = name;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = 'FALSE';
+      button.setAttribute('aria-pressed', 'false');
+      button.setAttribute('aria-label', `${name}: preview false. Activate to preview true.`);
+      button.addEventListener('click', () => {
+        if (document.body.classList.contains('live')) return;
+        const active = button.getAttribute('aria-pressed') !== 'true';
+        button.setAttribute('aria-pressed', String(active));
+        button.textContent = active ? 'TRUE' : 'FALSE';
+        button.setAttribute('aria-label', `${name}: preview ${active ? 'true' : 'false'}. Activate to change preview.`);
+        updateAlarms();
+      });
+      row.append(label, button);
+      grid.append(row);
+      buttons.set(name, button);
+    }
+    const timer = document.createElement('div');
+    timer.className = 'signal';
+    timer.innerHTML = '<span class="signal-name">TON0.PT / TON0.ET</span><span class="timer-value">timer values not displayed</span>';
+    grid.append(timer);
+    async function refreshLiveValues() {
+      if (location.protocol !== 'http:' || location.hostname !== '127.0.0.1' || location.port !== '8765') return;
+      try {
+        const response = await fetch('/api/values', {cache:'no-store'});
+        const data = await response.json();
+        const badge = document.querySelector('#connection-badge');
+        document.querySelector('#connection-label').textContent = data.message || 'Waiting for OpenPLC';
+        document.querySelector('#state-status').innerHTML = `<span class="led"></span>${data.message || 'Waiting for OpenPLC'}`;
+        if (!data.connected || !data.programMatches) return;
+        document.body.classList.add('live');
+        badge.classList.add('live');
+        document.querySelector('#level-hint').textContent = 'Approximate visual level from the low, high, and high-high switch states; no analog level value is available.';
+        document.querySelector('#pump-label').textContent = 'Pump running';
+        for (const [name, button] of buttons) {
+          const active = data.values?.[name];
+          if (typeof active !== 'boolean') continue;
+          button.disabled = true;
+          button.setAttribute('aria-pressed', String(active));
+          button.textContent = active ? 'TRUE' : 'FALSE';
+          button.setAttribute('aria-label', `${name}: live value ${active ? 'true' : 'false'}`);
+        }
+        const running = Boolean(data.values?.PUMP_RUNNING);
+        document.body.classList.toggle('pump-running', running);
+        updateAlarms(data.values || {});
+        updateHealth(data.values || {});
+        updateFailureTimer(data.values || {});
+        const pump = document.querySelector('#pump-status');
+        pump.classList.toggle('on', running);
+        pump.classList.toggle('off', !running);
+        pump.innerHTML = `<span class="led"></span>${running ? 'Running' : 'Stopped'}`;
+        const pct = data.values?.HIGH_HIGH_LEVEL ? 95 : data.values?.HIGH_LEVEL ? 90 : data.values?.LOW_LEVEL ? 20 : 46;
+        drawLevel(pct);
+        value.textContent = `~${pct}`;
+        addHistory(pct);
+        if (previousLevel !== null && previousLevel !== pct) addEvent('Level change', `${previousLevel}% to ${pct}%`, pct);
+        previousLevel = pct;
+        const activeAlarms = alarmNames.filter(name => data.values?.[name] === true);
+        if (previousAlarms !== null) {
+          for (const name of alarmNames) {
+            const wasActive = previousAlarms.includes(name);
+            const isActive = activeAlarms.includes(name);
+            if (wasActive !== isActive) addEvent('Alarm', `${name} ${isActive ? 'activated' : 'cleared'}`, pct);
+          }
+        } else {
+          for (const name of activeAlarms) addEvent('Alarm', `${name} active at connection`, pct);
+        }
+        previousAlarms = activeAlarms;
+      } catch (_) {
+        // Keep the preview visible if the local read-only bridge is not available.
+      }
+    }
+    refreshLiveValues();
+    setInterval(refreshLiveValues, 500);
+    function drawLevel(percent) {
+      const top = 344 - 2.88 * percent;
+      fill.setAttribute('y', top);
+      fill.setAttribute('height', 344 - top + 12);
+      line.setAttribute('transform', `translate(0 ${top - 224})`);
+      value.textContent = percent;
+    }
+    slider.addEventListener('input', () => drawLevel(Number(slider.value)));
+    drawLevel(Number(slider.value));
+  </script>
+</body>
+</html>

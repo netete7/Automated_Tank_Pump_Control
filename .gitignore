@@ -1,0 +1,14 @@
+# Local Python environment used by the visualizer
+tank-visualizer/.venv/
+__pycache__/
+*.py[cod]
+
+# Generated OpenPLC runtime/build files
+/build/
+
+# macOS metadata
+.DS_Store
+
+# Accidental TextEdit copies of this file
+/.gitignore.txt
+/.gitignore.rtf
